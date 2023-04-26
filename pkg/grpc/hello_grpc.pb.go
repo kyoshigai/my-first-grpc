@@ -29,7 +29,7 @@ type GreetingServiceClient interface {
 	// クライアントストリーミングRPC
 	HelloClientStream(ctx context.Context, opts ...grpc.CallOption) (GreetingService_HelloClientStreamClient, error)
 	// 双方向ストリーミングRPC
-	HelloBiDiStream(ctx context.Context, opts ...grpc.CallOption) (GreetingService_HelloBiDiStreamClient, error)
+	HelloBiStream(ctx context.Context, opts ...grpc.CallOption) (GreetingService_HelloBiStreamClient, error)
 }
 
 type greetingServiceClient struct {
@@ -115,30 +115,30 @@ func (x *greetingServiceHelloClientStreamClient) CloseAndRecv() (*HelloResponse,
 	return m, nil
 }
 
-func (c *greetingServiceClient) HelloBiDiStream(ctx context.Context, opts ...grpc.CallOption) (GreetingService_HelloBiDiStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &GreetingService_ServiceDesc.Streams[2], "/myapp.GreetingService/HelloBiDiStream", opts...)
+func (c *greetingServiceClient) HelloBiStream(ctx context.Context, opts ...grpc.CallOption) (GreetingService_HelloBiStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GreetingService_ServiceDesc.Streams[2], "/myapp.GreetingService/HelloBiStream", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &greetingServiceHelloBiDiStreamClient{stream}
+	x := &greetingServiceHelloBiStreamClient{stream}
 	return x, nil
 }
 
-type GreetingService_HelloBiDiStreamClient interface {
+type GreetingService_HelloBiStreamClient interface {
 	Send(*HelloRequest) error
 	Recv() (*HelloResponse, error)
 	grpc.ClientStream
 }
 
-type greetingServiceHelloBiDiStreamClient struct {
+type greetingServiceHelloBiStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *greetingServiceHelloBiDiStreamClient) Send(m *HelloRequest) error {
+func (x *greetingServiceHelloBiStreamClient) Send(m *HelloRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *greetingServiceHelloBiDiStreamClient) Recv() (*HelloResponse, error) {
+func (x *greetingServiceHelloBiStreamClient) Recv() (*HelloResponse, error) {
 	m := new(HelloResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -157,7 +157,7 @@ type GreetingServiceServer interface {
 	// クライアントストリーミングRPC
 	HelloClientStream(GreetingService_HelloClientStreamServer) error
 	// 双方向ストリーミングRPC
-	HelloBiDiStream(GreetingService_HelloBiDiStreamServer) error
+	HelloBiStream(GreetingService_HelloBiStreamServer) error
 	mustEmbedUnimplementedGreetingServiceServer()
 }
 
@@ -174,8 +174,8 @@ func (UnimplementedGreetingServiceServer) HelloServerStream(*HelloRequest, Greet
 func (UnimplementedGreetingServiceServer) HelloClientStream(GreetingService_HelloClientStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method HelloClientStream not implemented")
 }
-func (UnimplementedGreetingServiceServer) HelloBiDiStream(GreetingService_HelloBiDiStreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method HelloBiDiStream not implemented")
+func (UnimplementedGreetingServiceServer) HelloBiStream(GreetingService_HelloBiStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method HelloBiStream not implemented")
 }
 func (UnimplementedGreetingServiceServer) mustEmbedUnimplementedGreetingServiceServer() {}
 
@@ -255,25 +255,25 @@ func (x *greetingServiceHelloClientStreamServer) Recv() (*HelloRequest, error) {
 	return m, nil
 }
 
-func _GreetingService_HelloBiDiStream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(GreetingServiceServer).HelloBiDiStream(&greetingServiceHelloBiDiStreamServer{stream})
+func _GreetingService_HelloBiStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GreetingServiceServer).HelloBiStream(&greetingServiceHelloBiStreamServer{stream})
 }
 
-type GreetingService_HelloBiDiStreamServer interface {
+type GreetingService_HelloBiStreamServer interface {
 	Send(*HelloResponse) error
 	Recv() (*HelloRequest, error)
 	grpc.ServerStream
 }
 
-type greetingServiceHelloBiDiStreamServer struct {
+type greetingServiceHelloBiStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *greetingServiceHelloBiDiStreamServer) Send(m *HelloResponse) error {
+func (x *greetingServiceHelloBiStreamServer) Send(m *HelloResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *greetingServiceHelloBiDiStreamServer) Recv() (*HelloRequest, error) {
+func (x *greetingServiceHelloBiStreamServer) Recv() (*HelloRequest, error) {
 	m := new(HelloRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -305,8 +305,8 @@ var GreetingService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "HelloBiDiStream",
-			Handler:       _GreetingService_HelloBiDiStream_Handler,
+			StreamName:    "HelloBiStream",
+			Handler:       _GreetingService_HelloBiStream_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
