@@ -104,8 +104,14 @@ func main() {
 
 	// 2. gRPCサーバーを作成
 	s := grpc.NewServer(
-		grpc.UnaryInterceptor(myUnaryServerInterceptor1),
-		grpc.StreamInterceptor(myStreamServerInterceptor1),
+		grpc.ChainUnaryInterceptor(
+			myUnaryServerInterceptor1,
+			myUnaryServerInterceptor2,
+		),
+		grpc.ChainStreamInterceptor(
+			myStreamServerInterceptor1,
+			myStreamServerInterceptor2,
+		),
 	)
 
 	hellopb.RegisterGreetingServiceServer(s, NewMyServer())
