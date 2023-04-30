@@ -13,12 +13,9 @@ import (
 
 	hellopb "my-first-grpc/pkg/grpc"
 
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
-
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 )
 
 type myServer struct {
@@ -26,18 +23,13 @@ type myServer struct {
 }
 
 func (s *myServer) Hello(ctx context.Context, req *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
-	// リクエストからnameフィールドを取り出して
-	// "Hello, [名前]!"というレスポンスを返す
-	// return &hellopb.HelloResponse{
-	// 	Message: fmt.Sprintf("Hello, %s!", req.GetName()),
-	// }, nil
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		log.Printf("md: %+v\n", md)
+	}
 
-	stat := status.New(codes.Unknown, "unknown error occurred")
-	stat, _ = stat.WithDetails(&errdetails.DebugInfo{
-		Detail: "detail reason of err",
-	})
-	err := stat.Err()
-	return nil, err
+	return &hellopb.HelloResponse{
+		Message: fmt.Sprintf("Hello, %s!", req.GetName()),
+	}, nil
 }
 
 func NewMyServer() *myServer {
@@ -77,6 +69,10 @@ func (s *myServer) HelloClientStream(stream hellopb.GreetingService_HelloClientS
 }
 
 func (s *myServer) HelloBiStream(stream hellopb.GreetingService_HelloBiStreamServer) error {
+	if md, ok := metadata.FromIncomingContext(stream.Context()); ok {
+		log.Printf("md: %+v\n", md)
+	}
+
 	for {
 		req, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
